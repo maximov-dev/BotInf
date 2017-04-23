@@ -1,204 +1,37 @@
-# -*- coding: utf-8 -*-
-import telebot
-import pyowm
+import Weather, News, Config, Info
+import telegram, logging, pyowm
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from pyowm import OWM
 
-city=0
-temperatura=0
-bot = telebot.TeleBot("350473795:AAHiVcpEP7SeFfKC17SHGZVAnh2YtyTq-Vw")
+updater = Updater(token = Config.BOT_TOKEN)
+owm = OWM(Config.WEATHER_TOKEN, language = 'ru')
 
-def weather(city, temperatura):
-    msg = bot.send_message(message.chat.id, city = input('Какой город ва интересует?: '))
-    owm = pyowm.OWM('91c713db144e1ce5a94dffd4229169ed')
-    observation = owm.weather_at_place(city)
-    w = observation.get_weather()
-    temperatura = w.get_temperature('celsius')['temp']
-    veter = w.get_wind()
-    vlash = w.get_humidity()
-    detalstat = w.get_detailed_status()
-    print ("В городе " + city + "," + " " + "сейчас температура: " + str(temperatura) + " " + "по Цельсию.")
-    print ("Направление и скорость ветра" + " " + str(veter))
-    print ("Влажность в городе" + " " + city + " " + str(vlash))
-    print (detalstat + "\n" + "На сегодня все, спасибо за пользование программы!)")
-    return temperatura
+root = logging.getLogger()
+root.setLevel(logging.INFO)
 
-#def main():
-    # @bot.message_handler(commands=['help', 'start'])
-    # def send_welcome(message):
-    #     msg = bot.send_message(message.chat.id, weather(temperatura))
-    #
-    # @bot.message_handler(commands=['auth'])
-    # def send_auth(message):
-    #     pass
-    #
-    # bot.polling()
-
-# @bot.message_handler(commands=['help', 'start'])
-# def send_welcome(message):
-#     msg = bot.send_message(message.chat.id, weather(temperatura))
-#
-# @bot.message_handler(commands=['auth'])
-# def send_auth(message):
-#     pass
-#
-# bot.polling()
-
-
-# if __name__ == "__main__":
-#      bot.polling(none_stop=True)
-
-import telebot
-from telebot import types
-
-bot = telebot.TeleBot("350473795:AAHiVcpEP7SeFfKC17SHGZVAnh2YtyTq-Vw")
-
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
-from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
-                          ConversationHandler)
-
-import logging
-
-# Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                                  level = logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-GENDER, PHOTO, LOCATION, BIO = range(4)
-
-
-def start(bot, update):
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
-    update.message.reply_text(
-        'Hi! My name is Professor Bot. I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-
-    return GENDER
-
-
-def gender(bot, update):
-    city = update.message.from_user
-    #msg = bot.send_message(message.chat.id, city = input('Какой город ва интересует?: '))
-    owm = pyowm.OWM('91c713db144e1ce5a94dffd4229169ed')
-    observation = owm.weather_at_place(city)
-    w = observation.get_weather()
-    temperatura = w.get_temperature('celsius')['temp']
-    veter = w.get_wind()
-    vlash = w.get_humidity()
-    detalstat = w.get_detailed_status()
-    # print ("В городе " + city + "," + " " + "сейчас температура: " + str(temperatura) + " " + "по Цельсию.")
-    # print ("Направление и скорость ветра" + " " + str(veter))
-    # print ("Влажность в городе" + " " + city + " " + str(vlash))
-    # print (detalstat + "\n" + "На сегодня все, спасибо за пользование программы!)")
-
-    logger.info("Weather of", city (str(temperatura), update.message.text))
-    update.message.reply_text('I see! Please send me a photo of yourself, '
-                              'so I know what you look like, or send /skip if you don\'t want to.',
-                              reply_markup=ReplyKeyboardRemove())
-
-    return PHOTO
-
-
-def photo(bot, update):
-    user = update.message.from_user
-    photo_file = bot.getFile(update.message.photo[-1].file_id)
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo of %s: %s" % (user.first_name, 'user_photo.jpg'))
-    update.message.reply_text('Gorgeous! Now, send me your location please, '
-                              'or send /skip if you don\'t want to.')
-
-    return LOCATION
-
-
-def skip_photo(bot, update):
-    user = update.message.from_user
-    logger.info("User %s did not send a photo." % user.first_name)
-    update.message.reply_text('I bet you look great! Now, send me your location please, '
-                              'or send /skip.')
-
-    return LOCATION
-
-
-def location(bot, update):
-    user = update.message.from_user
-    user_location = update.message.location
-    logger.info("Location of %s: %f / %f"
-                % (user.first_name, user_location.latitude, user_location.longitude))
-    update.message.reply_text('Maybe I can visit you sometime! '
-                              'At last, tell me something about yourself.')
-
-    return BIO
-
-
-def skip_location(bot, update):
-    user = update.message.from_user
-    logger.info("User %s did not send a location." % user.first_name)
-    update.message.reply_text('You seem a bit paranoid! '
-                              'At last, tell me something about yourself.')
-
-    return BIO
-
-
-def bio(bot, update):
-    user = update.message.from_user
-    logger.info("Bio of %s: %s" % (user.first_name, update.message.text))
-    update.message.reply_text('Thank you! I hope we can talk again some day.')
-
-    return ConversationHandler.END
-
-
-def cancel(bot, update):
-    user = update.message.from_user
-    logger.info("User %s canceled the conversation." % user.first_name)
-    update.message.reply_text('Bye! I hope we can talk again some day.',
-                              reply_markup=ReplyKeyboardRemove())
-
-    return ConversationHandler.END
-
-
-def error(bot, update, error):
-    logger.warn('Update "%s" caused error "%s"' % (update, error))
-
+# @bot.message_handler(content_types=["text"])
+# def feedback(message):
+#     bot.send_message(message.chat.id, message.text)
 
 def main():
-    # Create the EventHandler and pass it your bot's token.
-    updater = Updater("350473795:AAHiVcpEP7SeFfKC17SHGZVAnh2YtyTq-Vw")
-
-    # Get the dispatcher to register handlers
     dp = updater.dispatcher
-
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-
-        states={
-            GENDER: [RegexHandler('^(Boy|Girl|Other)$', gender)],
-
-            PHOTO: [MessageHandler(Filters.photo, photo),
-                    CommandHandler('skip', skip_photo)],
-
-            LOCATION: [MessageHandler(Filters.location, location),
-                       CommandHandler('skip', skip_location)],
-
-            BIO: [MessageHandler(Filters.text, bio)]
-        },
-
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-
-    dp.add_handler(conv_handler)
-
-    # log all errors
-    dp.add_error_handler(error)
-
-    # Start the Bot
+    dp.add_handler(CommandHandler("start", Info.getAbout))
+    dp.add_handler(CommandHandler("start", Info.getAbout))
+    dp.add_handler(CommandHandler("rnews", News.getRegionNews))
+    dp.add_handler(CommandHandler("gnews", News.getNews_List))
+    dp.add_handler(CommandHandler("weather", Weather.start))
+    dp.add_handler(MessageHandler([Filters.text], Weather.city))
+    dp.add_handler(CommandHandler('delete', Weather.delete, pass_args=True))
+    dp.add_handler(MessageHandler([Filters.command], Weather.unknown))
     updater.start_polling()
 
-
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
