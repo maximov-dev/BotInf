@@ -1,82 +1,78 @@
 import Config, BotInf, Info
-import telegram, pyowm
-from telegram import Update, ForceReply
+import telegram.ext, pyowm
+from telegram.ext import updater
+from telegram import update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from pyowm import OWM
 
-hide_markup = telegram.ReplyKeyboardHide()
+class WeatherApp():
+    def __init__(self):
+        hide_markup = telegram.ReplyKeyboardHide()
+        self.towns=[]
+        self.town_keyboard = [['Помощь'], self.towns]
+        self.town_markup = telegram.ReplyKeyboardMarkup(self.town_keyboard, resize_keyboard=True)
+        self.remove_towns = []
+        self.remove_keyboard = [self.remove_towns]
+        self.remove_markup = telegram.ReplyKeyboardMarkup(self.remove_keyboard, resize_keyboard=True)
+        self.message = update.message
+        self.chat_id = self.message.chat_id
+        self.text = self.message.text
+        self.helpmessages = "Данный бот оповещает пользователя свежей информацией о погоде и новостям в регионе\n/weather - узнать погоду (вводите свой город в формате 'Penza')\n/rnews - региональные новости\n/gnews - новости мира"
 
-towns = []
-town_keyboard = [['Помощь'], towns]
-town_markup = telegram.ReplyKeyboardMarkup(town_keyboard, resize_keyboard=True)
 
-remove_towns = []
-remove_keyboard = [remove_towns]
-remove_markup = telegram.ReplyKeyboardMarkup(remove_keyboard, resize_keyboard=True)
+    def start(self, bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id, text="Введите город для сохранения", reply_markup=self.town_markup)
 
-helpmessages = Info.describe
-
-def start(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="Введите город для сохранения", reply_markup=town_markup)
-
-
-def city(bot, update):
-    message = update.message
-    chat_id = message.chat_id
-    text = message.text
-
-    if text == "Remove city":
-        bot.sendMessage(chat_id=chat_id, text="Выберите город который хотите удалить", reply_markup=remove_markup)
-    elif text == "Помощь":
-        bot.sendMessage(chat_id=chat_id, text=helpmessages, reply_markup=town_markup)
-    else:
-        if len(towns) == 0:
-            towns.append(text)
-            remove_towns.append("/delete " + text)
-            town_keyboard.append(["Remove city"])
-            town_keyboard.remove(["Помощь"])
-            bot.sendMessage(chat_id=chat_id, text="Сохранили", reply_markup=town_markup)
-        elif len(towns) == 1:
-            if text == towns[0] and "/delete " + text == remove_towns[0]:
-                get_weather(bot, update, text)
-            else:
-                towns.append(text)
-                remove_towns.append("/delete " + text)
-                bot.sendMessage(chat_id=chat_id, text="Сохранили", reply_markup=town_markup)
-        elif len(towns) == 2:
-            if (text == towns[0] or text == towns[1]) and (
-                        "/delete " + text == remove_towns[0] or "/delete " + text == remove_towns[1]):
-                get_weather(bot, update, text)
-            else:
-                towns.append(text)
-                remove_towns.append("/delete " + text)
-                bot.sendMessage(chat_id=chat_id, text="Сохранили", reply_markup=town_markup)
+    def city(self, bot, update):
+        if self.text == "Remove city":
+            bot.sendMessage(chat_id=self.chat_id, text="Выберите город который хотите удалить", reply_markup=self.remove_markup)
+        elif self.text == "Помощь":
+            bot.sendMessage(chat_id=self.chat_id, text= self.helpmessages, reply_markup=self.town_markup)
         else:
-            get_weather(bot, update, text)
+            if len(self.towns) == 0:
+                self.towns.append(self.text)
+                self.remove_towns.append("/delete " + self.text)
+                self.town_keyboard.append(["Remove city"])
+                self.town_keyboard.remove(["Помощь"])
+                bot.sendMessage(chat_id=self.chat_id, text="Сохранили", reply_markup=self.town_markup)
+            elif len(self.towns) == 1:
+                if self.text == self.towns[0] and "/delete " + self.text == self.remove_towns[0]:
+                    WeatherApp.get_weather(bot, update, self.text)
+                else:
+                    self.towns.append(self.text)
+                    self.remove_towns.append("/delete " + self.text)
+                    bot.sendMessage(chat_id=self.chat_id, text="Сохранили", reply_markup=self.town_markup)
+            elif len(self.towns) == 2:
+                if (self.text == self.towns[0] or self.text == self.towns[1]) and (
+                            "/delete " + self.text == self.remove_towns[0] or "/delete " + self.text == self.remove_towns[1]):
+                    WeatherApp.get_weather(bot, update, self.text)
+                else:
+                    self.towns.append(self.text)
+                    self.remove_towns.append("/delete " + self.text)
+                    bot.sendMessage(chat_id=self.chat_id, text="Сохранили", reply_markup=self.town_markup)
+            else:
+                WeatherApp.get_weather(bot, update, self.text)
 
 
-def get_weather(bot, update, text):
-    obs = BotInf.owm.weather_at_place(text)
-    w = obs.get_weather()
-    temp = str(round(w.get_temperature(unit='celsius').get('temp')))
-    status = str(w.get_detailed_status())
-    bot.sendMessage(chat_id=update.message.chat_id, text="Температура: " + temp + ", состояние погоды: " + status)
+    def get_weather(self, bot, update, text):
+        obs = BotInf.owm.weather_at_place(text)
+        w = obs.get_weather()
+        temp = str(round(w.get_temperature(unit='celsius').get('temp')))
+        status = str(w.get_detailed_status())
+        bot.sendMessage(chat_id=update.message.chat_id, text="Температура: " + temp + ", состояние погоды: " + status)
 
 
-def delete(bot, update, args):
-    message = update.message
-    chat_id = message.chat_id
-
-    try:
-        towns.remove(args[0])
-        remove_towns.remove("/delete " + args[0])
-        if len(towns) == 0:
-            town_keyboard.remove(["Remove city"])
-            town_keyboard.append(["Помощь"])
-        bot.sendMessage(chat_id=chat_id, text="Город удален", reply_markup=town_markup)
-    except ValueError:
-        bot.sendMessage(chat_id=chat_id, text="Этого города не существует", reply_markup=town_markup)
+    def delete(self, bot, update, args):
+        try:
+            self.towns.remove(args[0])
+            self.remove_towns.remove("/delete " + args[0])
+            if len(self.towns) == 0:
+                self.town_keyboard.remove(["Remove city"])
+                self.town_keyboard.append(["Помощь"])
+            bot.sendMessage(chat_id=self.chat_id, text="Город удален", reply_markup=self.town_markup)
+        except ValueError:
+            bot.sendMessage(chat_id=self.chat_id, text="Этого города не существует", reply_markup=self.town_markup)
 
 
-def unknown(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="Неизвестная команда")
+    def unknown(self, bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id, text="Неизвестная команда")
