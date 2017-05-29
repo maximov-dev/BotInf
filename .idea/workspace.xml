@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="65a035f0-f9c7-4f3f-9c6c-6bccf9f98c43" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/123" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chandler.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mhandler.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BotInf.py" afterPath="$PROJECT_DIR$/BotInf.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Info.py" afterPath="$PROJECT_DIR$/Info.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/News.py" afterPath="$PROJECT_DIR$/News.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Weather.py" afterPath="$PROJECT_DIR$/Weather.py" />
-    </list>
+    <list default="true" id="65a035f0-f9c7-4f3f-9c6c-6bccf9f98c43" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
