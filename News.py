@@ -1,11 +1,5 @@
-import urllib.request
 import requests
 from bs4 import BeautifulSoup
-import Config, BotInf
-import telegram, pyowm
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from pyowm import OWM
 
 class News: #класс новостей
 
