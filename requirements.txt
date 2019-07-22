@@ -1,0 +1,4 @@
+requests==2.22.0
+beautifulsoup4==4.8.0
+pyowm==2.10.0
+telegram==0.0.1
