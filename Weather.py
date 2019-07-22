@@ -4,7 +4,7 @@ from pyowm import OWM
 
 owm = OWM(Config.WEATHER_TOKEN, language='ru')
 # Скрытие клавиатуры по ненадобности
-hide_markup = telegram.ReplyKeyboardHide()
+hide_markup = telegram.ReplyKeyboardRemove()
 
 # Список городо в списке(основная клавиатура)
 towns = []
